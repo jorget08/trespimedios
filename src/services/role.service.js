@@ -7,6 +7,11 @@ class RoleService{
         const newRole = await Role.create(data);
         return newRole;
         }
+
+    async find(id){
+        const role = await Role.findByPk(id);
+        return role;
+    }
     
 }
 

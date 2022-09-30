@@ -1,4 +1,6 @@
-const {User} = require('../db');
+const {User, Role} = require('../db');
+const bcrypt = require('bcrypt');
+
 
 class UserService{
     constructor(){
@@ -10,7 +12,9 @@ class UserService{
     }
 
     async create(data){
-        const newUser = await User.create(data);
+        const hash = await bcrypt.hash(data.password, 10);
+        const newUser = await User.create({...data, password: hash});
+        delete newUser.dataValues.password;
         return newUser;
     }
 
@@ -21,8 +25,20 @@ class UserService{
     }
 
     async findOne(id){
-        const user = await User.findOne(id);
-        return user
+        const user = await User.findByPk(id);
+        return user;
+    }
+
+    async findByUsername(username){
+        const user = await User.findOne({
+            where: {
+                username,
+            },
+            include: {
+                model: Role
+            }
+        });
+        return user;
     }
 }
 

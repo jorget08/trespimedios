@@ -3,8 +3,13 @@ const router = Router();
 
 const SaleService = require('../services/sale.service');
 const service = new SaleService();
+const {checkRoles} = require('../middlewares/auth.handler');
+const passport = require('passport');
 
-router.get('/', async (req, res, next) => {
+router.get('/',
+    passport.authenticate('jwt', {session: false}),
+    checkRoles(['admin', 'employee']),
+    async (req, res, next) => {
     try {
         res.status(200).json(await service.find);
     } catch (error) {
@@ -12,7 +17,10 @@ router.get('/', async (req, res, next) => {
     }
 })
 
-router.post('/', async (req, res, next) => {
+router.post('/',
+    passport.authenticate('jwt', {session: false}),
+    checkRoles(['admin', 'employee']),    
+    async (req, res, next) => {
     try {
         const body = req.body;
         res.status(201).json(await service.create(body));
@@ -21,7 +29,10 @@ router.post('/', async (req, res, next) => {
     }
 })
 
-router.delete('/:id', async (req, res, next) => {
+router.delete('/:id', 
+    passport.authenticate('jwt', {session: false}),
+    checkRoles(['admin']),
+    async (req, res, next) => {
     try {
         const { id } = req.params;
         res.status(200).json(await service.delete(id))
@@ -30,7 +41,10 @@ router.delete('/:id', async (req, res, next) => {
     }
 })
 
-router.patch('/:id', async (req,res, next) => {
+router.patch('/:id',
+    passport.authenticate('jwt', {session: false}),
+    checkRoles(['admin']),
+    async (req,res, next) => {
     try {
         const { id } = req.params;
         const body = req.body;

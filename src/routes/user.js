@@ -5,8 +5,13 @@ const UserService = require('../services/user.service');
 const RoleService = require('../services/role.service');
 const service = new UserService();
 const serviceRole = new RoleService();
+const {checkRoles} = require('../middlewares/auth.handler');
+const passport = require('passport');
 
-router.get('/', async (req, res, next) => {
+router.get('/', 
+    passport.authenticate('jwt', {session: false}),
+    checkRoles(['admin']),
+    async (req, res, next) => {
     try {
         res.status(200).json(await service.find);
     } catch (error) {
@@ -14,7 +19,10 @@ router.get('/', async (req, res, next) => {
     }
 })
 
-router.post('/', async (req, res, next) => {
+router.post('/', 
+    passport.authenticate('jwt', {session: false}),
+    checkRoles(['admin']),
+    async (req, res, next) => {
     try {
         const body = req.body;
         res.status(201).json(await service.create(body));
@@ -23,7 +31,10 @@ router.post('/', async (req, res, next) => {
     }
 })
 
-router.delete('/:id', async (req, res, next) => {
+router.delete('/:id', 
+    passport.authenticate('jwt', {session: false}),
+    checkRoles(['admin']),
+    async (req, res, next) => {
     try {
         const { id } = req.params;
         res.status(200).json(await service.delete(id))
@@ -32,18 +43,25 @@ router.delete('/:id', async (req, res, next) => {
     }
 })
 
-router.put('/:id', async (req,res, next) => {
+router.put('/:id', 
+    passport.authenticate('jwt', {session: false}),
+    checkRoles(['admin']),
+    async (req,res, next) => {
     try {
         const { id, idRole } = req.params;
         const user = await service.findOne(id);
-        await user.setRole(idRole);
-        return user;
+        const role = await serviceRole.find(idRole);
+        await user.setRole(role);
+        res.json(user);
     } catch (error) {
         next(error)
     }
 })
 
-router.post('/role', async (req,res,next) => {
+router.post('/role', 
+    passport.authenticate('jwt', {session: false}),
+    checkRoles(['admin']),
+    async (req,res,next) => {
     try {
         const body = req.body;
         res.status(201).json(await serviceRole.create(body))
